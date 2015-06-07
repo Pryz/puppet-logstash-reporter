@@ -41,9 +41,13 @@ Puppet::Reports.register_report(:logstash) do
     event["tags"] = ["puppet-#{self.kind}"]
     event["message"] = "Puppet run on #{self.host} #{self.status}"
     event["logs"] = logs
-    event["environment"] = self.environment
-    event["report_format"] = self.report_format
-    event["puppet_version"] = self.puppet_version
+    event["environment"] = self.environment ? self.environment : 'production'
+    if Puppet.version >= '3.0.0'
+      event["report_format"] = self.report_format
+      event["puppet_version"] = self.puppet_version
+    else
+      event["puppet_version"] = '2.x'
+    end
     event["status"] = self.status
     event["start_time"] = self.logs.first.time.utc.iso8601
     event["end_time"] = self.logs.last.time.utc.iso8601
